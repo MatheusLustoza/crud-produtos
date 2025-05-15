@@ -1,41 +1,40 @@
-// controllers/authController.js
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 
-// Cadastro
-exports.register = async (req, res) => {
-  const { username, password } = req.body;
+const SECRET_KEY = 'seuSegredoSuperSecreto';
 
-  try {
-    // Criptografar a senha
-    const hash = await bcrypt.hash(password, 10);
+const AuthController = {
+  register: async (req, res) => {
+    const { username, password } = req.body;
+    try {
+      const hash = await bcrypt.hash(password, 10);
+      const user = await User.create({ username, password: hash });
+      res.status(201).json({ id: user.id, username: user.username });
+    } catch (err) {
+      res.status(400).json({ error: 'Erro ao cadastrar usuário' });
+    }
+  },
 
-    // Criar usuário no banco
-    const user = await User.create({ username, password: hash });
+  login: async (req, res) => {
+    const { username, password } = req.body;
+    try {
+      const user = await User.findOne({ where: { username } });
+      if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
 
-    res.status(201).json({ message: 'Usuário cadastrado com sucesso!' });
-  } catch (err) {
-    res.status(400).json({ error: 'Erro ao cadastrar usuário' });
+      const valid = await bcrypt.compare(password, user.password);
+      if (!valid) return res.status(401).json({ error: 'Senha incorreta' });
+
+      const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
+
+      res.json({
+        message: 'Login bem-sucedido',
+        token
+      });
+    } catch (err) {
+      res.status(500).json({ error: 'Erro no login' });
+    }
   }
 };
 
-// Login
-exports.login = async (req, res) => {
-  const { username, password } = req.body;
-
-  try {
-    // Verificar se o usuário existe
-    const user = await User.findOne({ where: { username } });
-
-    if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
-
-    // Comparar a senha enviada com a senha criptografada
-    const valid = await bcrypt.compare(password, user.password);
-
-    if (!valid) return res.status(401).json({ error: 'Senha incorreta' });
-
-    res.json({ message: 'Login bem-sucedido' });
-  } catch (err) {
-    res.status(500).json({ error: 'Erro no login' });
-  }
-};
+module.exports = AuthController;

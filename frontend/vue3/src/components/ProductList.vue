@@ -1,9 +1,12 @@
 <template>
     <div class="container">
+      <button class="logout-button" @click="logout">Sair</button>
       <center><h2>Gerenciamento de Produtos:</h2></center>
+      
+      
   
-      <!-- Formulário de criação/edição -->
-      <center><div class="form">
+  
+      <center><div class="form">  
         <input v-model="product.name" placeholder="Nome do produto" />
         <input v-model.number="product.price" type="number" placeholder="Preço" />
         <input v-model="product.description" placeholder="Descrição" />
@@ -105,10 +108,16 @@
         this.product = { name: '', price: 0, description: '' };
         this.editing = false;
         this.editingId = null;
-      }
+      },
+      logout() {
+  this.$emit('logout');
+  }
     }
+    
   };
+  
   </script>
+  
   
   <style scoped>
   .container { max-width: 800px; margin: 0 auto; padding: 20px;}
