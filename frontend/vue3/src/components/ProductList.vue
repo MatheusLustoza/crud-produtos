@@ -1,5 +1,6 @@
 <template>
     <div class="container">
+      <button class="logout-button" @click="logout">Sair</button>
       <center><h2>Gerenciamento de Produtos:</h2></center>
   
       <!-- Formulário de criação/edição -->
@@ -54,59 +55,61 @@
       this.fetchProducts();
     },
     methods: {
-      async fetchProducts() {
-        try {
-          const res = await axios.get('http://localhost:3000/api/products');
-          this.products = res.data;
-        } catch (err) {
-          console.error('Erro ao buscar produtos:', err);
-        }
-      },
-      async createProduct() {
-        try {
-          await axios.post('http://localhost:3000/api/products', this.product);
-          this.resetForm();
-          this.fetchProducts();
-        } catch (err) {
-          console.error('Erro ao criar produto:', err);
-        }
-      },
-      async updateProduct() {
-        try {
-            await axios.put(
-  `http://localhost:3000/api/products/${this.editingId}`,
-  this.product
-)
-          this.resetForm();
-          this.fetchProducts();
-        } catch (err) {
-          console.error('Erro ao atualizar produto:', err);
-        }
-      },
-      async deleteProduct(id) {
-        if (!confirm('Deletar este produto?')) return;
-        try {
-          await axios.delete(
-            `http://localhost:3000/api/products/${id}`);
-          this.fetchProducts();
-        } catch (err) {
-          console.error('Erro ao deletar produto:', err);
-        }
-      },
-      editProduct(item) {
-        this.product = { ...item };
-        this.editing = true;
-        this.editingId = item.id;
-      },
-      cancelEdit() {
-        this.resetForm();
-      },
-      resetForm() {
-        this.product = { name: '', price: 0, description: '' };
-        this.editing = false;
-        this.editingId = null;
-      }
+  async fetchProducts() {
+    try {
+      const res = await axios.get('http://localhost:3000/api/products');
+      this.products = res.data;
+    } catch (err) {
+      console.error('Erro ao buscar produtos:', err);
     }
+  },
+  async createProduct() {
+    try {
+      await axios.post('http://localhost:3000/api/products', this.product);
+      this.resetForm();
+      this.fetchProducts();
+    } catch (err) {
+      console.error('Erro ao criar produto:', err);
+    }
+  },
+  async updateProduct() {
+    try {
+      await axios.put(
+        `http://localhost:3000/api/products/${this.editingId}`,
+        this.product
+      );
+      this.resetForm();
+      this.fetchProducts();
+    } catch (err) {
+      console.error('Erro ao atualizar produto:', err);
+    }
+  },
+  async deleteProduct(id) {
+    if (!confirm('Deletar este produto?')) return;
+    try {
+      await axios.delete(`http://localhost:3000/api/products/${id}`);
+      this.fetchProducts();
+    } catch (err) {
+      console.error('Erro ao deletar produto:', err);
+    }
+  },
+  editProduct(item) {
+    this.product = { ...item };
+    this.editing = true;
+    this.editingId = item.id;
+  },
+  cancelEdit() {
+    this.resetForm();
+  },
+  resetForm() {
+    this.product = { name: '', price: 0, description: '' };
+    this.editing = false;
+    this.editingId = null;
+  },
+  logout() {
+  this.$emit('logout');
+  }
+}
   };
   </script>
   

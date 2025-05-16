@@ -1,41 +1,32 @@
 const express = require('express');
 const router = express.Router();
+const AuthController = require('../controllers/authController');
+const authMiddleware = require('../middleware/authMiddleware');
 const User = require('../models/User');
-const bcrypt = require('bcrypt');
 
-// Rota de cadastro
-router.post('/register', async (req, res) => {
-  const { username, password } = req.body;
-  try {
-    const hash = await bcrypt.hash(password, 10);
-    const user = await User.create({ username, password: hash });
-    res.status(201).json(user);
-  } catch (err) {
-    res.status(400).json({ error: 'Erro ao cadastrar usuário' });
-  }
-});
+// Cadastro e login
+router.post('/register', AuthController.register);
+router.post('/login', AuthController.login);
 
-// Rota de login
-router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+// Rota protegida
+router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const user = await User.findOne({ where: { username } });
+    const user = await User.findByPk(req.user.id, {
+      attributes: ['id', 'username']
+    });
     if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
-
-    const valid = await bcrypt.compare(password, user.password);
-    if (!valid) return res.status(401).json({ error: 'Senha incorreta' });
-
-    res.json({ message: 'Login bem-sucedido' });
+    res.json(user);
   } catch (err) {
-    res.status(500).json({ error: 'Erro no login' });
+    res.status(500).json({ error: 'Erro ao buscar usuário' });
   }
 });
 
-// Rota para consultar todos os usuários (GET)
+
+// Consultar todos os usuários
 router.get('/users', async (req, res) => {
   try {
-    const users = await User.findAll({
-      attributes: ['id', 'username', 'password'] // Inclui também o hash da senha
+    const users = await require('../models/User').findAll({
+      attributes: ['id', 'username', 'password'] // Inclui o hash da senha
     });
     res.json(users);
   } catch (err) {
@@ -43,10 +34,11 @@ router.get('/users', async (req, res) => {
   }
 });
 
+// Excluir usuário por ID
 router.delete('/users/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const deleted = await User.destroy({ where: { id } });
+    const deleted = await require('../models/User').destroy({ where: { id } });
     if (deleted) {
       res.json({ message: 'Usuário excluído com sucesso' });
     } else {
@@ -57,4 +49,4 @@ router.delete('/users/:id', async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports=router;

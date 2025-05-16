@@ -2,22 +2,17 @@ const express = require('express');
 const cors = require('cors');
 const sequelize = require('./config/database');
 const authRoutes = require('./routes/auth');
-const productRoutes = require('./routes/products'); 
+const productRoutes = require('./routes/products');
 
-const app = express(); 
+const app = express();
 
 // Middlewares
 app.use(cors());
-app.use(express.json());
+app.use(express.json()); // *** Esse middleware é necessário para o Express processar JSON ***
 
 // Rotas
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
-
-// Debug opcional
-console.log('>>> Cheguei antes do sync');
-console.log('>>> Tipo de sequelize:', typeof sequelize);
-console.log('>>> Chaves de sequelize:', Object.keys(sequelize));
 
 // Sync e inicialização do servidor
 sequelize.sync()
@@ -28,5 +23,5 @@ sequelize.sync()
     });
   })
   .catch(err => {
-    console.error('Erro ao sincronizar banco ou iniciar servidor:', err);
-  });
+    console.error('Erro ao sincronizar banco ou iniciar servidor:',err);
+});

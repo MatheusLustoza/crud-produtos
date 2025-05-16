@@ -1,53 +1,40 @@
-const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const bcrypt = require('bcrypt');
 
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./database.sqlite');
-
-exports.listUsers = (req, res) => {
-  const sql = 'SELECT id, username FROM users';
-  db.all(sql, [], (err, rows) => {
-    if (err) {
-      console.error(err.message);
-      res.status(500).json({ error: 'Erro ao consultar usuários.' });
-    } else {
-      res.json(rows);
-    }
-  });
-};
+const SECRET_KEY = 'seuSegredoSuperSecreto';
 
 const AuthController = {
-  async register(req, res) {
+  register: async (req, res) => {
     const { username, password } = req.body;
-
     try {
       const hash = await bcrypt.hash(password, 10);
       const user = await User.create({ username, password: hash });
-      return res.status(201).json(user);
+      res.status(201).json({ id: user.id, username: user.username });
     } catch (err) {
-      return res.status(400).json({ error: 'Erro ao cadastrar usuário' });
+      res.status(400).json({ error: 'Erro ao cadastrar usuário' });
     }
   },
 
-  async login(req, res) {
+  login: async (req, res) => {
     const { username, password } = req.body;
-  
-    if (!username || !password) {
-      return res.status(400).json({ error: 'Usuário e senha são obrigatórios' });
-    }
-  
     try {
       const user = await User.findOne({ where: { username } });
       if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
-  
+
       const valid = await bcrypt.compare(password, user.password);
       if (!valid) return res.status(401).json({ error: 'Senha incorreta' });
-  
-      return res.json({ message: 'Login bem-sucedido' });
+
+      const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
+
+      res.json({
+        message: 'Login bem-sucedido',
+        token
+      });
     } catch (err) {
-      return res.status(500).json({ error: 'Erro no login' });
+      res.status(500).json({ error: 'Erro no login' });
     }
   }
 };
 
-module.exports=AuthController;
+module.exports = AuthController;

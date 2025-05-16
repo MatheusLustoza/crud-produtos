@@ -2,7 +2,7 @@
   <div class="container">
     <Register v-if="!logado && tela === 'cadastro'" @mudarTela="tela = $event" />
     <Login v-if="!logado && tela === 'login'" @logado="logado = true" @mudarTela="tela = $event" />
-    <ProductList v-if="logado" />
+    <ProductList v-if="logado" @logout="logado = false; tela = 'login'" />
   </div>
 </template>
 
