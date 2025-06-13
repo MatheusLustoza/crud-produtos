@@ -17,24 +17,43 @@ const AuthController = {
   },
 
   login: async (req, res) => {
-    const { username, password } = req.body;
-    try {
-      const user = await User.findOne({ where: { username } });
-      if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
+  const { username, password } = req.body;
+  try {
+    const user = await User.findOne({ where: { username } });
+    if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
 
-      const valid = await bcrypt.compare(password, user.password);
-      if (!valid) return res.status(401).json({ error: 'Senha incorreta' });
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return res.status(401).json({ error: 'Senha incorreta' });
 
-      const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
+    const token = jwt.sign(
+      { id: user.id, username: user.username },
+      SECRET_KEY,
+      { expiresIn: '1h' }
+    );
 
-      res.json({
-        message: 'Login bem-sucedido',
-        token
-      });
-    } catch (err) {
-      res.status(500).json({ error: 'Erro no login' });
-    }
+    res.json({
+      message: 'Login bem-sucedido',
+      token    // vindo da requisição 
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro no login' });
+  }
+}
+};
+const getProdutos = async (req, res) => {
+  const { categoria } = req.query;
+  const where = {};
+
+  if (categoria) {
+    where.categoria = categoria;
+  }
+
+  try {
+    const produtos = await Produto.findAll({ where });
+    res.json(produtos);
+  } catch (error) {
+    res.status(500).json({ erro: "Erro ao buscar produtos." });
   }
 };
 
-module.exports = AuthController;
+module.exports = AuthController;

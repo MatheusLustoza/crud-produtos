@@ -5,7 +5,7 @@
     <input v-model="username" placeholder="Usuário" class="input-field" />
     <input v-model="password" type="password" placeholder="Senha" class="input-field" />
     <!--Fica desabilitado se username ou password estiverem vazios-->
-    <button :disabled="!username || !password":class="['btn-login', { 'btn-disabled': !username || !password, 'btn-active': username && password }]"@click="register">Cadastrar Usuário</button>
+    <button :disabled="!username || !password" :class="['btn-login', { 'btn-disabled': !username || !password, 'btn-active': username && password }]" @click="register" > Cadastrar Usuário </button>
     <!--O segundo botão emite um evento para trocar a tela-->
     <button @click="$emit('mudarTela', 'login')" class="btn-cadastrar">Voltar para o login</button>
 </div>

@@ -12,27 +12,28 @@ router.post('/login', AuthController.login);
 router.get('/me', authMiddleware, async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id, {
-      attributes: ['id', 'username']
+      attributes: ['id', 'username', 'password'] // ou remova 'password' se quiser mais seguro
     });
+
     if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
+
     res.json(user);
   } catch (err) {
     res.status(500).json({ error: 'Erro ao buscar usuário' });
   }
 });
 
-
+module.exports = router;
 // Consultar todos os usuários
+
 router.get('/users', async (req, res) => {
   try {
-    const users = await require('../models/User').findAll({
-      attributes: ['id', 'username', 'password'] // Inclui o hash da senha
-    });
-    res.json(users);
+    throw new Error('Simulando erro ao buscar usuários'); // força o catch
   } catch (err) {
     res.status(500).json({ error: 'Erro ao buscar usuários' });
   }
 });
+
 
 // Excluir usuário por ID
 router.delete('/users/:id', async (req, res) => {
@@ -48,5 +49,4 @@ router.delete('/users/:id', async (req, res) => {
     res.status(500).json({ error: 'Erro ao excluir usuário' });
   }
 });
-
-module.exports=router;
+module.exports = router;

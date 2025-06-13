@@ -1,10 +1,12 @@
 <template>
   <div class="content">
+        <img src="/logo.png" alt="Logo" class="logo" />
     <h2>Login</h2>
     <input v-model="username" placeholder="Usuário" class="input-field" />
     <input v-model="password" type="password" placeholder="Senha" class="input-field" />
     <button :disabled="!username || !password":class="['btn-login', { 'btn-disabled': !username || !password, 'btn-active': username && password }]"@click="login">Entrar</button>
-    <button @click="$emit('mudarTela', 'cadastro')" class="btn-cadastrar">Cadastrar</button>
+    <button @click="$emit('mudarTela', 'cadastro')" class="btn-cadastrar">Cadastrar</button> 
+     
   </div>
 </template>
 
@@ -18,21 +20,24 @@ export default {
   },
   methods: {
     async login() {
-      try {
-        // Envia os dados para o backend via POST para autenticar o usuário
-        const res = await axios.post('http://localhost:3000/api/auth/login', {
-          username: this.username,
-          password: this.password
-        });
-        alert('Login bem-sucedido');
-        this.$emit('logado');
-      } catch (err) {
-        alert('Erro ao fazer login');
-        console.error(err);
-      }
-    }
+  try {
+    const res = await axios.post('http://localhost:3000/api/auth/login', {
+      username: this.username,
+      password: this.password
+    });
+
+    localStorage.setItem('token', res.data.token);
+    localStorage.setItem('username', this.username);
+    alert('Login bem-sucedido');
+
+    // 👉 Aqui está a correção
+    this.$emit('logado');
+    this.$emit('mudarTela', 'menu');
+  } catch (err) {
+    alert('Erro ao fazer login');
+    console.error(err);
   }
-};
+}
+}
+}
 </script>
-
-
